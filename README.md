@@ -1,1 +1,1 @@
-# fungifacts
+# fungifun
