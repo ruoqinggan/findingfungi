@@ -1,3 +1,35 @@
+var popup;
+var button;
+var tween = null;
+
+function debug() {
+    this.game.debug.text("Click to open window + drag + close", 32, 32);
+}
+
+function Hero(game, x, y) {
+    // call Phaser.Sprite constructor
+    Phaser.Sprite.call(this, game, x, y, 'hero');
+    this.anchor.set(0.5, 0.5);
+    this.game.physics.enable(this);
+    this.body.collideWorldBounds = true; // stay in screen
+}
+
+function openWindow() {
+    if ((tween !== null && tween.isRunning) || popup.scale.x === 1) {
+        return;
+    }
+    //  Create a tween that will pop-open the window, but only if it's not already tweening or open
+    tween = this.game.add.tween(popup.scale).to( { x: 1, y: 1 }, 1000, Phaser.Easing.Elastic.Out, true);
+}
+
+function closeWindow() {
+    if (tween && tween.isRunning || popup.scale.x === 0) {
+        return;
+    }
+    //  create a tween that will close the window, but only if it's not already tweening or closed
+    tween = this.game.add.tween(popup.scale).to( { x: 0, y: 0}, 500, Phaser.Easing.Elastic.In, true);
+}
+
 PlayState = {};
 
 // ************************ init ************************
@@ -30,22 +62,19 @@ PlayState.preload = function () {
     this.game.load.image('tile:1x1', 'images/tile_1x1.png');
     // load hero image
     this.game.load.image('hero', 'images/hero_stopped.png');
+    // load horse mushroom image
+    this.game.load.spritesheet('horse-mushroom', 'images/horse_mushroom.png');
     // load sound effect for jumping
     this.game.load.audio('sfx:jump', 'audio/jump.wav');
     // load sound effect for eating a broccoli
     this.game.load.audio('sfx:broccoli', 'audio/broccoli.wav');
     // load broccoli image
     this.game.load.spritesheet('broccoli', 'images/broccoli_animated.png', 22, 22);
+    // load close button images
+    // this.game.load.image('close', 'images/green_button.png');
+    this.game.load.spritesheet('button', 'images/green_button.png', 60, 60);
 
 };
-
-function Hero(game, x, y) {
-    // call Phaser.Sprite constructor
-    Phaser.Sprite.call(this, game, x, y, 'hero');
-    this.anchor.set(0.5, 0.5);
-    this.game.physics.enable(this);
-    this.body.collideWorldBounds = true; // stay in screen
-}
 
 // inherit from Phaser.Sprite
 Hero.prototype = Object.create(Phaser.Sprite.prototype);
@@ -59,12 +88,12 @@ Hero.prototype.jump = function () {
     this.body.velocity.y = -JUMP_SPEED;
 };
 
-var popup;
-
 // ************************ create ************************
 // create game entities and set up world here
 PlayState.create = function () {
+    // add background image
     this.game.add.image(0, 0, 'background');
+    // load level
     this._loadLevel(this.game.cache.getJSON('level:1'));
     // create sound entities
     this.sfx = {
@@ -87,6 +116,29 @@ PlayState._loadLevel = function (data) {
     // enable gravity
     const GRAVITY = 1200;
     this.game.physics.arcade.gravity.y = GRAVITY;
+
+    // create pop-up window
+    popup = this.game.add.sprite(this.game.world.centerX,
+        this.game.world.centerY, 'horse-mushroom');
+    popup.anchor.set(0.5);
+    popup.inputEnabled = true;
+    popup.input.enableDrag();
+    //  Position the close button to the top-right of the popup sprite (minus 8px for spacing)
+    var pw = (popup.width / 2) - 30;
+    var ph = (popup.height / 2) - 8;
+
+    //  And click the close button to close it down again
+    var closeButton = this.game.make.sprite(pw, -ph, 'button');
+    closeButton.inputEnabled = true;
+    closeButton.input.priorityID = 1;
+    closeButton.input.useHandCursor = true;
+    closeButton.events.onInputDown.add(closeWindow, this);
+
+    //  Add the "close button" to the popup window image
+    popup.addChild(closeButton);
+
+    //  Hide it awaiting a click
+    popup.scale.set(0);
 };
 
 // spawn the platforms
@@ -145,4 +197,11 @@ PlayState._handleCollisions = function () {
 PlayState._onHeroVsBrocolli = function (hero, broccoli) {
     this.sfx.broccoli.play();
     broccoli.kill();
+
+    if ((tween !== null && tween.isRunning) || popup.scale.x === 1) {
+        return;
+    }
+    //  Create a tween that will pop-open the window, but only if it's not already tweening or open
+    tween = this.game.add.tween(popup.scale).to( { x: 1, y: 1 }, 1000, Phaser.Easing.Elastic.Out, true);
+
 };
