@@ -62,7 +62,14 @@ PlayState.preload = function () {
     this.game.load.image('tile:1x1', 'images/tile_1x1.png');
     // load hero image
     this.game.load.image('hero', 'images/hero_stopped.png');
-    // load horse mushroom image
+    // load mushroom images
+    this.game.load.image('shroom_sb', 'images/mushroom_s_brown.png');
+    this.game.load.image('shroom_st', 'images/mushroom_s_tan.png');
+    this.game.load.image('shroom_sr', 'images/mushroom_s_red.png');
+    this.game.load.image('shroom_tb', 'images/mushroom_tall_brown.png');
+    this.game.load.image('shroom_tt', 'images/mushroom_tall_tan.png');
+    this.game.load.image('shroom_tr', 'images/mushroom_tall_red.png');
+    // load mushroom info page
     this.game.load.spritesheet('horse-mushroom', 'images/horse_mushroom.png');
     // load sound effect for jumping
     this.game.load.audio('sfx:jump', 'audio/jump.wav');
@@ -71,7 +78,7 @@ PlayState.preload = function () {
     // load broccoli image
     this.game.load.spritesheet('broccoli', 'images/broccoli_animated.png', 22, 22);
     // load close button images
-    // this.game.load.image('close', 'images/green_button.png');
+    this.game.load.image('close', 'images/green_button.png');
     this.game.load.spritesheet('button', 'images/green_button.png', 60, 60);
 
 };
@@ -128,7 +135,7 @@ PlayState._loadLevel = function (data) {
     var ph = (popup.height / 2) - 8;
 
     //  And click the close button to close it down again
-    var closeButton = this.game.make.sprite(pw, -ph, 'button');
+    var closeButton = this.game.make.sprite(pw, -ph, 'close');
     closeButton.inputEnabled = true;
     closeButton.input.priorityID = 1;
     closeButton.input.useHandCursor = true;
